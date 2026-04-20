@@ -1,1 +1,11 @@
+# Environments
+.venv/
 .env
+
+# Certificates and Secrets
+**/acme.json
+**/*.key
+**/*.crt
+
+# OS Metadata
+.DS_Store

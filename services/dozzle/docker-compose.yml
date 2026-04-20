@@ -1,0 +1,17 @@
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.logs.rule=Host(`logs.arch-services.mywire.org`)"
+      - "traefik.http.routers.logs.entrypoints=websecure"
+      - "traefik.http.routers.logs.tls.certresolver=myresolver"
+
+networks:
+  proxy-net:
+    external: true

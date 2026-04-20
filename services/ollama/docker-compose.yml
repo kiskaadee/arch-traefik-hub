@@ -1,0 +1,24 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    deploy:
+      replicas: 3
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_data:/root/.ollama:rw
+    networks:
+      - proxy-net # Use the hub network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama.rule=Host(`ollama.arch-services.mywire.org`)"
+      - "traefik.http.routers.ollama.entrypoints=websecure"
+      - "traefik.http.routers.ollama.tls.certresolver=myresolver"
+      - "traefik.http.services.ollama.loadbalancer.server.port=11434"
+
+volumes:
+  ollama_data:
+
+networks:
+  proxy-net:
+    external: true
