@@ -1,0 +1,14 @@
+# This service is responsible for updating the Dynu DDNS record with the current IP address
+# Copy this to /etc/systemd/system/dynu.service
+# This script is intended to run via systemd
+[Unit]
+Description=Dynu IP Monitor & Updater
+
+[Service]
+Type=oneshot
+StateDirectory=dynu
+EnvironmentFile=/etc/conf.d/dynu-environment
+ExecStart=/usr/local/bin/ip-monitor.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutSec=30

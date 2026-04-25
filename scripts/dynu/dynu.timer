@@ -1,0 +1,13 @@
+# This timer is used to run the dynu.service
+# Copy this to /etc/systemd/system/dynu.timer
+[Unit]
+Description=Run Dynu updater periodically
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=15min
+AccuracySec=10s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,16 @@
+# Example Dynu DDNS credentials
+# Don't use your main account password. Use the IP update password or its hash instead.
+# Secure the env file from local users read:
+# chmod 600 /etc/conf.d/dynu-environment
+# chown root:root /etc/conf.d/dynu-environment
+
+# No quotes/spaces
+# Your Dynu hostname (e.g., subdomain you registered)
+DYNU_HOST=your-subdomain.dynu.net
+
+# Dynu username (account login)
+DYNU_USER=your-username
+
+# Dynu DDNS IP Update Password (not account password): Dynu API supports passwords as plain text or MD5 hashes
+DYNU_PASSWORD=ip-update-password-or-hash
+
