@@ -4,7 +4,7 @@
 Description=Run Dynu updater periodically
 
 [Timer]
-OnBootSec=1min
+OnBootSec=30s
 OnUnitActiveSec=15min
 AccuracySec=10s
 Persistent=true
