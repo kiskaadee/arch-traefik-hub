@@ -1,31 +1,63 @@
-# Bootstrap: this copies the scripts to the correct locations and enables the services
+#!/usr/bin/env bash
 set -euo pipefail
 
-# Flow summary:
-# copy files
-# daemon-reload
-# edit config
-# enable + start timer
-# done
+# --- argument parsing ---
+DYNU_HOST=""
+DYNU_USER=""
+DYNU_PASSWORD=""
 
-sudo mkdir -p /etc/conf.d
-sudo install -m 755 ip-monitor.sh /usr/local/bin/ip-monitor.sh
-sudo cp dynu.service /etc/systemd/system/dynu.service
-sudo cp dynu.timer /etc/systemd/system/dynu.timer
-sudo cp dynu-environment /etc/conf.d/dynu-environment
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --host) DYNU_HOST="$2"; shift 2 ;;
+        --user) DYNU_USER="$2"; shift 2 ;;
+        --password) DYNU_PASSWORD="$2"; shift 2 ;;
+        *)
+            echo "Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+done
 
-sudo systemctl daemon-reload
+# --- validation ---
+: "${DYNU_HOST:?--host required}"
+: "${DYNU_USER:?--user required}"
+: "${DYNU_PASSWORD:?--password required}"
 
-echo "Configure Dynu credentials..."
-sudo ${EDITOR:-vi} /etc/conf.d/dynu-environment
+# --- root check ---
+if [[ $EUID -ne 0 ]]; then
+    echo "Run as root"
+    exit 1
+fi
 
-sudo chmod 600 /etc/conf.d/dynu-environment
-sudo chown root:root /etc/conf.d/dynu-environment
+# --- paths ---
+BIN_PATH="/usr/local/bin/ip-monitor.sh"
+SERVICE_PATH="/etc/systemd/system/dynu.service"
+TIMER_PATH="/etc/systemd/system/dynu.timer"
+ENV_PATH="/etc/conf.d/dynu-environment"
 
+# --- install files ---
+install -m 755 ip-monitor.sh "$BIN_PATH"
+install -m 644 dynu.service "$SERVICE_PATH"
+install -m 644 dynu.timer "$TIMER_PATH"
 
-sudo systemctl enable dynu.timer
-sudo systemctl start dynu.timer
+# --- write env file atomically ---
+TMP_ENV=$(mktemp)
 
-echo "Done!"
-echo "Last IP: "
-echo "Use: journalctl -u dynu.service -f"
+cat > "$TMP_ENV" <<EOF
+DYNU_HOST=$DYNU_HOST
+DYNU_USER=$DYNU_USER
+DYNU_PASSWORD=$DYNU_PASSWORD
+EOF
+
+install -m 600 "$TMP_ENV" "$ENV_PATH"
+rm -f "$TMP_ENV"
+
+# --- systemd reload ---
+systemctl daemon-reload
+
+# --- enable + start timer  ---
+systemctl enable --now dynu.timer
+
+echo "Installation complete"
+echo "Check logs with: journalctl -u dynu.service -f"
+
