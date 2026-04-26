@@ -1,53 +1,113 @@
 # 🗺️ Project Roadmap: Arch-traefik-hub
 
-This document outlines the development phases for the **Arch-traefik-hub** ecosystem, focusing on security, observability, and service scalability.
+This roadmap reflects the current system maturity and next priorities.
 
-## Phase 1: Core Gateway & Security 🔒
-*The objective is to establish a hardened "Front Door" with automated certificate management.*
+---
 
-- [ ] **Credential Provisioning:** Configure the `.env` layer using Dynu API credentials.
-- [ ] **Infrastructure Initialization:** Execute the `up.sh` deployment orchestration script.
-- [ ] **ACME Validation:** Monitor Traefik logs to verify successful **DNS-01 challenges** and SSL certificate issuance.
-- [ ] **Traffic Verification:** Confirm secure $HTTPS$ routing to the gateway via the `*.arch-services.mywire.org` TLD.
+## Phase 1: Core Gateway & DNS Stability 🔒 (Mostly Complete)
 
-## Phase 2: Observability & Management Dashboard 📊
-*Transitioning from CLI-based management to a centralized visual interface.*
+Objective: stable external access with correct DNS resolution.
 
-- [ ] **Full-Stack Dashboard:** Develop a FastAPI-backed JS frontend to consume real-time container metadata.
-- [ ] **Dockerization:** Containerize the Python dashboard and deploy it as a core service within the `proxy-net`.
-- [ ] **Log Stream Integration:** Implement deep-linking between the custom dashboard and **Dozzle** for instant per-service log access.
+- [x] NAT Port Forwarding (80/443)
+- [x] Dynu DDNS IP synchronization (systemd-based)
+- [x] Traefik deployment with reverse proxy
+- [ ] ACME DNS-01 validation (Let's Encrypt)
+- [ ] End-to-end HTTPS verification across all services
+
+Notes:
+- IP drift is now handled independently via Dynu updater
+- Remaining risk is ACME challenge correctness
+
+---
+
+## Phase 2: Observability & Control Plane 📊
+
+Objective: reduce reliance on CLI and improve visibility.
+
+- [ ] FastAPI backend for service metadata
+- [ ] Minimal JS frontend dashboard
+- [ ] Integration with Docker socket (read-only)
+- [ ] Deep-linking to Dozzle logs per service
+- [ ] Health/status indicators for:
+  - containers
+  - domains
+  - SSL certificates
+
+---
 
 ## Phase 3: Service Ecosystem Expansion 🚀
-*Deploying high-utility services while maintaining network isolation and resource efficiency.*
 
-- [ ] **Visual Collaboration:** Deploy and configure **Excalidraw** and **Mermaid** for local diagramming.
-- [ ] **Local AI Hub:** Optimize the **Ollama** deployment with load-balanced replicas for high-availability inference.
-- [ ] **Performance Profiling:** Establish baseline CPU/RAM metrics to ensure host stability across all active services.
+Objective: increase utility without compromising isolation.
+
+- [ ] Excalidraw + diagram tooling
+- [ ] Expand Ollama cluster (load + memory tuning)
+- [ ] Add developer-focused tools (CI, registry, etc.)
+- [ ] Define service templates for quick onboarding
+
+Constraints:
+- Must use `proxy-net`
+- Must be Traefik-exposed
+- Must remain resource-aware
+
+---
 
 ## Phase 4: Network Optimization & Resilience 🌐
-*Optimizing the home network for low-latency and local-first access.*
 
-- [ ] **Local DNS Resolution:** (Optional) Integrate a DNS sinkhole (e.g., Pi-hole) to resolve hostnames locally, reducing reliance on external DNS lookups.
-- [ ] **Cross-Device Validation:** Audit **NAT Hairpinning** performance to ensure seamless access from mobile and IoT devices on the local Wi-Fi.
+Objective: reduce external dependencies and improve latency.
 
----
-
-## 💡 Implementation Best Practices
-
-### Network Resolution in Python
-When querying the Docker socket via the Python SDK, ensure the logic is resilient to Docker Compose project naming (which often prepends directory names to network strings):
-
-```python
-# Use partial matching to find the proxy-net membership
-if any("proxy-net" in net for net in networks.keys()):
-    # logic for proxy-registered containers
-```
-
-### Security Standards
-- **ACME Storage:** The `acme.json` file must maintain `600` permissions to be accepted by the Traefik provider.
-- **Socket Access:** The Docker socket is mounted as `ro` (Read-Only) wherever possible to adhere to the principle of least privilege.
+- [ ] Local DNS resolver (Pi-hole or equivalent)
+- [ ] Internal hostname resolution (LAN-first)
+- [ ] NAT hairpinning validation across devices
+- [ ] Optional fallback DNS providers for redundancy
 
 ---
 
-### How to use this roadmap
-This roadmap is updated as features are merged into the `main` branch. Contributions to the service templates or dashboard logic are welcome via Pull Requests.
+## Phase 5: Hardening & Reliability ⚙️
+
+Objective: move from “working” to “robust”.
+
+- [ ] Add alerting (failed Dynu updates, SSL issues)
+- [ ] Timer tuning based on real IP volatility
+- [ ] Rate-limit awareness for Dynu API
+- [ ] Backup strategy for:
+  - Traefik config
+  - ACME storage
+- [ ] Evaluate IPv6 support (explicitly out-of-scope so far)
+
+---
+
+## 💡 Engineering Notes
+
+### Separation of Concerns
+
+- Dynu updater:
+  - ensures correct **public IP**
+  - runs via systemd (host-level)
+
+- Traefik:
+  - ensures **TLS + routing**
+  - runs in Docker
+
+This separation prevents coupling failures (e.g., container restart affecting DNS correctness).
+
+---
+
+### Failure Model
+
+- **Degraded**
+  - DNS failure → HTTP fallback
+  - Provider-specific issues
+
+- **Error**
+  - No valid IP found
+  - Dynu API failure
+
+Only **successful external sync** mutates local state.
+
+---
+
+### How to Use This Roadmap
+
+- Updated after stable merges into `main`
+- Items should represent **deployable increments**, not ideas
+- Avoid speculative features unless tied to concrete problems
