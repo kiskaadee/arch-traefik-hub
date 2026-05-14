@@ -7,10 +7,14 @@ services:
       - proxy-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mermaid.rule=Host(`mermaid.arch-services.mywire.org`) || Host(`mermaid.localhost`)"
-
+      - "traefik.http.routers.mermaid.rule=Host(`mermaid.arch-services.mywire.org`)"
       - "traefik.http.routers.mermaid.entrypoints=websecure"
       - "traefik.http.routers.mermaid.tls.certresolver=myresolver"
+      - "traefik.http.routers.mermaid-red.rule=Host(`mermaid.arch-services.mywire.org`)"
+      - "traefik.http.routers.mermaid-red.entrypoints=web"
+      - "traefik.http.routers.mermaid-red.middlewares=https-redirect@docker"
+      - "traefik.http.routers.mermaid-local.rule=Host(`mermaid.localhost`)"
+      - "traefik.http.routers.mermaid-local.entrypoints=web"
       - "traefik.http.services.mermaid.loadbalancer.server.port=8080"
 
 networks:

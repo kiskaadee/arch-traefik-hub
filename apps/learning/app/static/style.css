@@ -1,0 +1,175 @@
+:root {
+    --bg: #f3f4f6;
+    --column-bg: #e5e7eb;
+    --card-bg: #ffffff;
+    --primary: #2563eb;
+    --text: #1f2937;
+    --border: #d1d5db;
+}
+
+body {
+    font-family: -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+h1 { margin: 0; }
+
+#add-course-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.column {
+    background: var(--column-bg);
+    border-radius: 8px;
+    width: 300px;
+    min-height: 500px;
+    padding: 15px;
+    flex-shrink: 0;
+}
+
+.column h2 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.course-list {
+    min-height: 400px;
+}
+
+.course-card {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: grab;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.course-card:hover {
+    border-color: var(--primary);
+}
+
+.course-card.dragging {
+    opacity: 0.5;
+}
+
+.course-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+}
+
+.course-card p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0 0 12px 0;
+}
+
+.card-links {
+    display: flex;
+    gap: 10px;
+    font-size: 0.8rem;
+}
+
+.card-links a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.card-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.card-actions button {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.card-actions button:hover {
+    color: var(--text);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    margin: 10% auto;
+    padding: 2rem;
+    width: 400px;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+
+.modal-actions button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}

@@ -52,3 +52,10 @@
         description: Diagramming Tool
         server: my-docker
         container: mermaid-live-editor
+
+# # Kanban Board Anchor
+# - Learning Hub:
+#     - Placeholder:
+#         icon: bookshelf.png
+#         href: #
+#         description: "This will be replaced by the Kanban board"

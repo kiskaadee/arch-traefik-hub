@@ -9,14 +9,25 @@ services:
       - proxy-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.authelia.rule=Host(`auth.arch-services.mywire.org`) || Host(`auth.localhost`)"
-
+      # Public (HTTPS)
+      - "traefik.http.routers.authelia.rule=Host(`auth.arch-services.mywire.org`)"
       - "traefik.http.routers.authelia.entrypoints=websecure"
       - "traefik.http.routers.authelia.tls.certresolver=myresolver"
-      # This label defines the middleware that other services will use
+
+      # Public (Redirect)
+      - "traefik.http.routers.authelia-red.rule=Host(`auth.arch-services.mywire.org`)"
+      - "traefik.http.routers.authelia-red.entrypoints=web"
+      - "traefik.http.routers.authelia-red.middlewares=https-redirect@docker"
+
+      # Local (HTTP)
+      - "traefik.http.routers.authelia-local.rule=Host(`auth.localhost`)"
+      - "traefik.http.routers.authelia-local.entrypoints=web"
+
+      # Middleware definition (shared)
       - "traefik.http.middlewares.authelia-auth.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.arch-services.mywire.org/"
       - "traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader=true"
       - "traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
+
 
 networks:
   proxy-net:

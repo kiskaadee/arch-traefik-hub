@@ -50,8 +50,6 @@ services:
       - "--providers.docker.endpoint=tcp://socket-proxy:2375"
       - "--providers.docker.exposedByDefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
       # SSL Setup
       - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
@@ -65,17 +63,29 @@ services:
       - proxy-net
     labels:
       - "traefik.enable=true"
-      # Authelia Middleware
-      - "traefik.http.middlewares.authelia-auth.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.arch-services.mywire.org/"
-      - "traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader=true"
-      - "traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
-      # Dashboard
-      - "traefik.http.routers.traefik-dash.rule=Host(`traefik.arch-services.mywire.org`) || Host(`traefik.localhost`)"
+      
+      # Middleware: Redirect to HTTPS
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
 
+      # Dashboard - Public (HTTPS)
+      - "traefik.http.routers.traefik-dash.rule=Host(`traefik.arch-services.mywire.org`)"
       - "traefik.http.routers.traefik-dash.entrypoints=websecure"
       - "traefik.http.routers.traefik-dash.tls.certresolver=myresolver"
       - "traefik.http.routers.traefik-dash.service=api@internal"
-      - "traefik.http.routers.traefik-dash.middlewares=authelia-auth"
+      - "traefik.http.routers.traefik-dash.middlewares=authelia-auth@docker"
+      
+      # Dashboard - Public (Redirect)
+      - "traefik.http.routers.traefik-dash-red.rule=Host(`traefik.arch-services.mywire.org`)"
+      - "traefik.http.routers.traefik-dash-red.entrypoints=web"
+      - "traefik.http.routers.traefik-dash-red.middlewares=https-redirect@docker"
+
+      # Dashboard - Local (HTTP)
+      - "traefik.http.routers.traefik-dash-local.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik-dash-local.entrypoints=web"
+      - "traefik.http.routers.traefik-dash-local.service=api@internal"
+
+
     logging:
       driver: "json-file"
       options:

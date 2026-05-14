@@ -1,0 +1,33 @@
+services:
+  learning-hub:
+    image: python:3.11-slim
+    container_name: learning-hub
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: >
+      sh -c "pip install fastapi uvicorn sqlalchemy && python -m app.main"
+    networks:
+      - proxy-net
+    labels:
+      - "traefik.enable=true"
+      # Public (HTTPS)
+      - "traefik.http.routers.learning.rule=Host(`learning.arch-services.mywire.org`)"
+      - "traefik.http.routers.learning.entrypoints=websecure"
+      - "traefik.http.routers.learning.tls.certresolver=myresolver"
+      - "traefik.http.routers.learning.middlewares=authelia-auth@docker"
+
+      # Public (Redirect)
+      - "traefik.http.routers.learning-red.rule=Host(`learning.arch-services.mywire.org`)"
+      - "traefik.http.routers.learning-red.entrypoints=web"
+      - "traefik.http.routers.learning-red.middlewares=https-redirect@docker"
+
+      # Local (HTTP)
+      - "traefik.http.routers.learning-local.rule=Host(`learning.localhost`)"
+      - "traefik.http.routers.learning-local.entrypoints=web"
+      
+      - "traefik.http.services.learning.loadbalancer.server.port=8000"
+
+networks:
+  proxy-net:
+    external: true
