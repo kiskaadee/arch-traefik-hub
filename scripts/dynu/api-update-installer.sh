@@ -36,9 +36,9 @@ TIMER_PATH="/etc/systemd/system/dynu.timer"
 ENV_PATH="/etc/conf.d/dynu-environment"
 
 # --- install files ---
-install -m 755 ip-monitor.sh "$BIN_PATH"
-install -m 644 dynu.service "$SERVICE_PATH"
-install -m 644 dynu.timer "$TIMER_PATH"
+install -m 755 "$(dirname "$0")/ip-monitor.sh" "$BIN_PATH"
+install -m 644 "$(dirname "$0")/install/dynu.service" "$SERVICE_PATH"
+install -m 644 "$(dirname "$0")/install/dynu.timer" "$TIMER_PATH"
 
 # --- write env file atomically ---
 TMP_ENV=$(mktemp)
