@@ -5,6 +5,7 @@ services:
     restart: always
     volumes:
       - ./config:/app/config
+      - /home:/home:ro
     environment:
       - HOMEPAGE_ALLOWED_HOSTS=arch-services.mywire.org
     networks:
@@ -17,14 +18,13 @@ services:
       - "traefik.http.routers.homepage.entrypoints=websecure"
       - "traefik.http.routers.homepage.tls=true"
 
-      # Public (Redirect)      - "traefik.http.routers.homepage-red.rule=Host(`arch-services.mywire.org`)"
+      # Public (Redirect)
+      - "traefik.http.routers.homepage-red.rule=Host(`arch-services.mywire.org`)"
       - "traefik.http.routers.homepage-red.entrypoints=web"
       - "traefik.http.routers.homepage-red.middlewares=https-redirect@docker"
 
       # Local (HTTP)
       - "traefik.http.routers.homepage-local.rule=Host(`homepage.localhost`) || Host(`dashboard.localhost`) || Host(`localhost`)"
-
-
       - "traefik.http.routers.homepage-local.entrypoints=web"
       
       - "traefik.http.services.homepage.loadbalancer.server.port=3000"

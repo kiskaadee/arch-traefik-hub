@@ -5,8 +5,10 @@ services:
     working_dir: /app
     volumes:
       - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home:/home:ro
     command: >
-      sh -c "pip install fastapi uvicorn sqlalchemy && python -m app.main"
+      sh -c "pip install fastapi uvicorn sqlalchemy psutil docker && python -m app.main"
     networks:
       - proxy-net
     labels:
@@ -15,7 +17,6 @@ services:
       - "traefik.http.routers.learning.rule=Host(`learning.arch-services.mywire.org`)"
       - "traefik.http.routers.learning.entrypoints=websecure"
       - "traefik.http.routers.learning.tls=true"
-      - "traefik.http.routers.learning.middlewares=authelia-auth@docker"
 
       # Public (Redirect)
       - "traefik.http.routers.learning-red.rule=Host(`learning.arch-services.mywire.org`)"

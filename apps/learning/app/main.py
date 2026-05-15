@@ -7,6 +7,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 import uvicorn
 import os
+import psutil
+import docker
 
 from . import models, database
 
@@ -14,6 +16,12 @@ from . import models, database
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title="Learning Hub API")
+
+# Initialize Docker client
+try:
+    docker_client = docker.from_env()
+except Exception:
+    docker_client = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,6 +53,64 @@ class Course(CourseBase):
     id: int
     class Config:
         from_attributes = True
+
+@app.get("/api/system-stats")
+def get_system_stats():
+    cpu = psutil.cpu_percent(interval=None) # Use None for non-blocking if called frequently
+    ram = psutil.virtual_memory()
+    # Monitor /home partition
+    disk_path = '/home' if os.path.exists('/home') else '/'
+    disk = psutil.disk_usage(disk_path)
+    return {
+        "cpu": cpu,
+        "ram_total": round(ram.total / (1024**3), 2),
+        "ram_used": round(ram.used / (1024**3), 2),
+        "ram_percent": ram.percent,
+        "disk_total": round(disk.total / (1024**3), 2),
+        "disk_used": round(disk.used / (1024**3), 2),
+        "disk_percent": disk.percent
+    }
+
+@app.get("/api/services")
+def get_services():
+    services_config = {
+        "infrastructure": [
+            {"name": "Traefik", "container": "traefik", "href": "https://traefik.arch-services.mywire.org"},
+            {"name": "Authelia", "container": "authelia", "href": "https://auth.arch-services.mywire.org"},
+            {"name": "Portainer", "container": "portainer", "href": "https://portainer.arch-services.mywire.org"},
+            {"name": "Dozzle", "container": "dozzle", "href": "https://logs.arch-services.mywire.org"},
+        ],
+        "applications": [
+            {"name": "Gitea", "container": "gitea", "href": "https://gitea.arch-services.mywire.org"},
+            {"name": "Ollama", "container": "ollama-ollama-1", "href": "https://ollama.arch-services.mywire.org"},
+            {"name": "Excalidraw", "container": "excalidraw-excalidraw-1", "href": "https://excalidraw.arch-services.mywire.org"},
+            {"name": "Mermaid", "container": "mermaid-live-editor", "href": "https://mermaid.arch-services.mywire.org"},
+        ]
+    }
+    
+    results = {"infrastructure": [], "applications": []}
+    
+    if not docker_client:
+        return services_config
+
+    for category in services_config:
+        for s in services_config[category]:
+            try:
+                container = docker_client.containers.get(s["container"])
+                status = container.status
+            except Exception:
+                status = "unknown"
+            results[category].append({**s, "status": status})
+            
+    return results
+
+@app.get("/api/bookmarks")
+def get_bookmarks():
+    return {
+        "Developer": [{"name": "Github", "href": "https://github.com/"}],
+        "Social": [{"name": "Reddit", "href": "https://reddit.com/"}],
+        "Entertainment": [{"name": "YouTube", "href": "https://youtube.com/"}]
+    }
 
 @app.get("/api/courses", response_model=List[Course])
 def read_courses(db: Session = Depends(get_db)):
@@ -109,8 +175,10 @@ def startup_event():
         db.commit()
     db.close()
 
-# Serves CSS/JS and index
-app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
+# Deprecated standalone UI - Serving only API
+@app.get("/")
+def read_root():
+    return {"message": "Learning Hub API is running. Use the main dashboard to access the Kanban board."}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
