@@ -36,3 +36,4 @@ venv/
 Thumbs.db
 apps/homepage/config/logs/
 
+apps/learning/learning.db
