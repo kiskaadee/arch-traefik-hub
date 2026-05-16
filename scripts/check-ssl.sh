@@ -6,6 +6,7 @@ DOMAINS=(
 "auth.arch-services.mywire.org"
 "excalidraw.arch-services.mywire.org"
 "gitea.arch-services.mywire.org"
+"jellyfin.arch-services.mywire.org"
 "learning.arch-services.mywire.org"
 "logs.arch-services.mywire.org"
 "mermaid.arch-services.mywire.org"
