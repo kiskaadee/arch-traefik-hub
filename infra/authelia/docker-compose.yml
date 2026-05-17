@@ -19,11 +19,6 @@ services:
       - "traefik.http.routers.authelia-red.entrypoints=web"
       - "traefik.http.routers.authelia-red.middlewares=https-redirect@docker"
 
-      # Local (HTTP)
-      - "traefik.http.routers.authelia-local.rule=Host(`auth.localhost`)"
-      - "traefik.http.routers.authelia-local.entrypoints=web"
-
-
 networks:
   proxy-net:
     external: true
