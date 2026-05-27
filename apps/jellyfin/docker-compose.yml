@@ -16,8 +16,12 @@ services:
       - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.arch-services.mywire.org`)"
       - "traefik.http.routers.jellyfin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin.tls=true"
-      - "traefik.http.routers.jellyfin.middlewares=authelia-auth@docker"
+      - "traefik.http.routers.jellyfin.middlewares=jellyfin-ratelimit@docker"
       - "traefik.http.routers.jellyfin.service=jellyfin-svc"
+
+      # Middleware: Rate Limit for Jellyfin
+      - "traefik.http.middlewares.jellyfin-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.jellyfin-ratelimit.ratelimit.burst=50"
 
       # Public (Redirect)
       - "traefik.http.routers.jellyfin-red.rule=Host(`jellyfin.arch-services.mywire.org`)"
