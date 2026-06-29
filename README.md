@@ -42,7 +42,7 @@ journalctl -u homeserver-core -f
 ### Manual Verification
 If running manually (or troubleshooting config edits):
 ```bash
-docker compose --env-file /run/secrets/homeserver.env up -d --remove-orphans
+docker compose --env-file /run/secrets/rendered/homeserver.env up -d --remove-orphans
 ```
 
 ---

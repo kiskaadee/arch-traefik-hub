@@ -27,7 +27,7 @@ Secrets are managed declaratively using **`sops-nix`** (Mozilla SOPS + age keys)
 [~/Config/hosts/desktop/secrets.yaml] (Encrypted)
        │
        ▼ (Decrypted at boot by sops-nix using SSH host key)
-[/run/secrets/homeserver.env] (Runtime Environment File)
+[/run/secrets/rendered/homeserver.env] (Runtime Environment File)
        │
        ▼ (Fed via --env-file flag into Docker Compose)
 [Docker Containers] (Active environment variables)
@@ -69,7 +69,7 @@ To add or modify credentials (e.g. changing your Dynu API key or updating Authel
 The stack is managed as a declarative systemd service inside `/home/kiskaadee/Config/hosts/desktop/homeserver.nix`:
 
 ### 1. Secret Environment Template
-The module defines a SOPS template to gather all secrets and structure them as key-value pairs at `/run/secrets/homeserver.env`:
+The module defines a SOPS template to gather all secrets and structure them as key-value pairs at `/run/secrets/rendered/homeserver.env`:
 ```nix
 sops.templates."homeserver.env" = {
   owner = "kiskaadee";
@@ -136,6 +136,6 @@ Because the systemd service manages the containers, standard `systemctl` command
 If you modify `docker-compose.yml` (e.g. adding a new Traefik routing label), you do **not** need to rebuild NixOS! You can apply it instantly:
 ```bash
 cd /home/kiskaadee/Deployments/homeserver
-docker compose --env-file /run/secrets/homeserver.env up -d --remove-orphans
+docker compose --env-file /run/secrets/rendered/homeserver.env up -d --remove-orphans
 ```
 This preserves the extreme agility of Docker Compose while keeping your system configuration and secrets declaratively managed.

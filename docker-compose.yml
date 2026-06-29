@@ -101,7 +101,7 @@ services:
     restart: always
     volumes:
       - ./config/authelia:/config
-      - /run/secrets/users.yml:/config/users.yml:ro
+      - /run/secrets/rendered/users.yml:/config/users.yml:ro
     environment:
       - DOMAIN=${DOMAIN}
       - AUTHELIA_SESSION_SECRET=${AUTHELIA_SESSION_SECRET}
